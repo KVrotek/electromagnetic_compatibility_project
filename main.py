@@ -1,4 +1,6 @@
+import math
 from tkinter.constants import W
+from typing_extensions import IntVar
 import models
 import model
 import tkinter as tk
@@ -17,7 +19,8 @@ class App(tk.Tk):
         super().__init__()
         
         self.frequencyTable = []
-        self.impedaceTable = []
+        self.impedanceTable = []
+        self.impedanceAngleTable = []
 
         self.title('RLC in high frequency')
 
@@ -58,28 +61,61 @@ class App(tk.Tk):
     def calculate(self):
         self.canvas.get_tk_widget().pack_forget()
         self.frequencyTable = [] 
-        self.impedaceTable = []
+        self.impedanceTable = []
+        self.impedanceAngleTable = []
         if self.choice == 'Rezystor idealny':
             for f in range(int(self.Fmin.get()),int(self.Fmax.get()),10):
                 resistance = int(self.RInput.get())
                 reactance = 0
                 impedance = np.complex(resistance,reactance)
                 impedanceModule = np.absolute(impedance)
+                impedanceAngle = np.angle(impedance,deg=True)
 
-                self.impedaceTable.append(impedanceModule)
+                self.impedanceAngleTable.append(impedanceAngle)
+                self.impedanceTable.append(impedanceModule)
                 self.frequencyTable.append(f) 
+        elif self.choice == 'Cewka idealna':
+            for f in range(int(self.Fmin.get()),int(self.Fmax.get()),10):
+                omega = 2*math.pi*f
+                reactance = omega*int(self.LInput.get())*(10**-6)
+                resistance = 0
+                impedance = np.complex(resistance,reactance)
+                impedanceModule = np.absolute(impedance)
+                impedanceAngle = np.angle(impedance,deg=True)
+
+                self.impedanceAngleTable.append(impedanceAngle)
+                self.impedanceTable.append(impedanceModule)
+                self.frequencyTable.append(f)
+        elif self.choice == 'Kondensator idealny':
+            for f in range(int(self.Fmin.get()),int(self.Fmax.get()),10):
+                omega = 2*math.pi*f
+                resistance = 0
+                reactance = -1/(omega*int(self.CInput.get())*(10**-12))
+                impedance = np.complex(resistance,reactance)
+                impedanceModule = np.absolute(impedance)
+                impedanceAngle = np.angle(impedance,deg=True)
+
+                self.impedanceAngleTable.append(impedanceAngle)
+                self.impedanceTable.append(impedanceModule)
+                self.frequencyTable.append(f)
+        else:
+            print('Brak modelu obliczenia')
         self.drawChart()
         #Trzeba zrobić hihihxD
         
 
     def checkBoxes(self):
-        self.impedanceModule = tk.Checkbutton(self.checkBoxFrame, text='Moduł impedancji') 
+        self.impedanceModuleB = tk.IntVar()
+        self.impedanceModule = tk.Checkbutton(self.checkBoxFrame, text='Moduł impedancji', variable=self.impedanceModuleB) 
         self.impedanceModule.grid(column=0,row=0, sticky=W)
-        self.impedanceAngle = tk.Checkbutton(self.checkBoxFrame, text='Kąt impedancji') 
+        self.impedanceAngleB = tk.IntVar()
+        self.impedanceAngle = tk.Checkbutton(self.checkBoxFrame, text='Kąt impedancji', variable=self.impedanceAngleB) 
         self.impedanceAngle.grid(column=0,row=1, sticky=W)
-        self.realPart = tk.Checkbutton(self.checkBoxFrame, text='Część rzeczywista') 
+        self.realPartB = tk.IntVar()
+        self.realPart = tk.Checkbutton(self.checkBoxFrame, text='Część rzeczywista', variable=self.realPartB) 
         self.realPart.grid(column=0,row=2, sticky=W)
-        self.imaginaryPart = tk.Checkbutton(self.checkBoxFrame, text='Część urojona') 
+        self.imaginaryPartB = tk.IntVar()
+        self.imaginaryPart = tk.Checkbutton(self.checkBoxFrame, text='Część urojona', variable=self.imaginaryPartB) 
         self.imaginaryPart.grid(column=0,row=3, sticky=W)
         
     def displaySelected(self, choice):
@@ -152,20 +188,20 @@ class App(tk.Tk):
     
     def idealLModel(self):
         self.inputFrame.grid(column=1, row=1,padx=30)
-        LInput = tk.Entry(self.inputFrame)
-        LInput.grid(column=1,row=0, sticky=W)
+        self.LInput = tk.Entry(self.inputFrame)
+        self.LInput.grid(column=1,row=0, sticky=W)
         LLabel = tk.Label(self.inputFrame, text='L')
         LLabel.grid(column=0,row=0, sticky=W)
         LUnitLabel = tk.Label(self.inputFrame, text='µH')
         LUnitLabel.grid(column=3,row=0, sticky=W)
-        Fmin = tk.Entry(self.inputFrame)
-        Fmin.grid(column=1, row=1, sticky=W)
+        self.Fmin = tk.Entry(self.inputFrame)
+        self.Fmin.grid(column=1, row=1, sticky=W)
         FminLabel = tk.Label(self.inputFrame, text='Fmin')
         FminLabel.grid(column=0, row=1, sticky=W)
         FminUnitLabel = tk.Label(self.inputFrame, text='Hz')
         FminUnitLabel.grid(column=3, row=1, sticky=W)
-        Fmax = tk.Entry(self.inputFrame)
-        Fmax.grid(column=1, row=2, sticky=W)
+        self.Fmax = tk.Entry(self.inputFrame)
+        self.Fmax.grid(column=1, row=2, sticky=W)
         FmaxLabel = tk.Label(self.inputFrame, text='Fmax')
         FmaxLabel.grid(column=0, row=2, sticky=W)
         FmaxUnitLabel = tk.Label(self.inputFrame, text='Hz')
@@ -173,20 +209,20 @@ class App(tk.Tk):
 
     def idealCModel(self):
         self.inputFrame.grid(column=1, row=1,padx=30)
-        CInput = tk.Entry(self.inputFrame)
-        CInput.grid(column=1,row=0, sticky=W)
+        self.CInput = tk.Entry(self.inputFrame)
+        self.CInput.grid(column=1,row=0, sticky=W)
         CLabel = tk.Label(self.inputFrame, text='C')
         CLabel.grid(column=0,row=0, sticky=W)
         CUnitLabel = tk.Label(self.inputFrame, text='pF')
         CUnitLabel.grid(column=3,row=0, sticky=W)
-        Fmin = tk.Entry(self.inputFrame)
-        Fmin.grid(column=1, row=1, sticky=W)
+        self.Fmin = tk.Entry(self.inputFrame)
+        self.Fmin.grid(column=1, row=1, sticky=W)
         FminLabel = tk.Label(self.inputFrame, text='Fmin')
         FminLabel.grid(column=0, row=1, sticky=W)
         FminUnitLabel = tk.Label(self.inputFrame, text='Hz')
         FminUnitLabel.grid(column=3, row=1, sticky=W)
-        Fmax = tk.Entry(self.inputFrame)
-        Fmax.grid(column=1, row=2, sticky=W)
+        self.Fmax = tk.Entry(self.inputFrame)
+        self.Fmax.grid(column=1, row=2, sticky=W)
         FmaxLabel = tk.Label(self.inputFrame, text='Fmax')
         FmaxLabel.grid(column=0, row=2, sticky=W)
         FmaxUnitLabel = tk.Label(self.inputFrame, text='Hz')
@@ -199,7 +235,14 @@ class App(tk.Tk):
         result.set_xlabel('Częstotliwość [Hz]')
         result.set_ylabel('Impedancja [Ω]')
         result.set_xscale('log')
-        result.plot(self.frequencyTable,self.impedaceTable)
+        if self.impedanceModuleB.get() == 1:
+            result.plot(self.frequencyTable,self.impedanceTable)
+        else:
+            pass
+        if self.impedanceAngleB.get() == 1:
+            result.plot(self.frequencyTable,self.impedanceAngleTable)
+        else:
+            pass
         self.canvas = FigureCanvasTkAgg(graph, self.chartFrame)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack()
