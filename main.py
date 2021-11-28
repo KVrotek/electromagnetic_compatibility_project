@@ -1,8 +1,5 @@
 import math
 from tkinter.constants import W
-from typing_extensions import IntVar
-import models
-import model
 import tkinter as tk
 from PIL import ImageTk,Image
 from matplotlib.figure import Figure
@@ -21,6 +18,8 @@ class App(tk.Tk):
         self.frequencyTable = []
         self.impedanceTable = []
         self.impedanceAngleTable = []
+        self.realPartTable = []
+        self.imaginaryPartTable = []
 
         self.title('RLC in high frequency')
 
@@ -63,6 +62,8 @@ class App(tk.Tk):
         self.frequencyTable = [] 
         self.impedanceTable = []
         self.impedanceAngleTable = []
+        self.realPartTable = []
+        self.imaginaryPartTable = []
         if self.choice == 'Rezystor idealny':
             for f in range(int(self.Fmin.get()),int(self.Fmax.get()),10):
                 resistance = int(self.RInput.get())
@@ -70,7 +71,11 @@ class App(tk.Tk):
                 impedance = np.complex(resistance,reactance)
                 impedanceModule = np.absolute(impedance)
                 impedanceAngle = np.angle(impedance,deg=True)
+                impedanceRealPart = np.real(impedance)
+                impedanceImaginaryPart = np.imag(impedance)
 
+                self.imaginaryPartTable.append(impedanceImaginaryPart)
+                self.realPartTable.append(impedanceRealPart)
                 self.impedanceAngleTable.append(impedanceAngle)
                 self.impedanceTable.append(impedanceModule)
                 self.frequencyTable.append(f) 
@@ -82,7 +87,11 @@ class App(tk.Tk):
                 impedance = np.complex(resistance,reactance)
                 impedanceModule = np.absolute(impedance)
                 impedanceAngle = np.angle(impedance,deg=True)
+                impedanceRealPart = np.real(impedance)
+                impedanceImaginaryPart = np.imag(impedance)
 
+                self.imaginaryPartTable.append(impedanceImaginaryPart)
+                self.realPartTable.append(impedanceRealPart)
                 self.impedanceAngleTable.append(impedanceAngle)
                 self.impedanceTable.append(impedanceModule)
                 self.frequencyTable.append(f)
@@ -94,7 +103,11 @@ class App(tk.Tk):
                 impedance = np.complex(resistance,reactance)
                 impedanceModule = np.absolute(impedance)
                 impedanceAngle = np.angle(impedance,deg=True)
+                impedanceRealPart = np.real(impedance)
+                impedanceImaginaryPart = np.imag(impedance)
 
+                self.imaginaryPartTable.append(impedanceImaginaryPart)
+                self.realPartTable.append(impedanceRealPart)
                 self.impedanceAngleTable.append(impedanceAngle)
                 self.impedanceTable.append(impedanceModule)
                 self.frequencyTable.append(f)
@@ -105,16 +118,16 @@ class App(tk.Tk):
         
 
     def checkBoxes(self):
-        self.impedanceModuleB = tk.IntVar()
+        self.impedanceModuleB = tk.IntVar(value=1)
         self.impedanceModule = tk.Checkbutton(self.checkBoxFrame, text='Moduł impedancji', variable=self.impedanceModuleB) 
         self.impedanceModule.grid(column=0,row=0, sticky=W)
-        self.impedanceAngleB = tk.IntVar()
+        self.impedanceAngleB = tk.IntVar(value=1)
         self.impedanceAngle = tk.Checkbutton(self.checkBoxFrame, text='Kąt impedancji', variable=self.impedanceAngleB) 
         self.impedanceAngle.grid(column=0,row=1, sticky=W)
-        self.realPartB = tk.IntVar()
+        self.realPartB = tk.IntVar(value=1)
         self.realPart = tk.Checkbutton(self.checkBoxFrame, text='Część rzeczywista', variable=self.realPartB) 
         self.realPart.grid(column=0,row=2, sticky=W)
-        self.imaginaryPartB = tk.IntVar()
+        self.imaginaryPartB = tk.IntVar(value=1)
         self.imaginaryPart = tk.Checkbutton(self.checkBoxFrame, text='Część urojona', variable=self.imaginaryPartB) 
         self.imaginaryPart.grid(column=0,row=3, sticky=W)
         
@@ -229,20 +242,36 @@ class App(tk.Tk):
         FmaxUnitLabel.grid(column=3, row=2, sticky=W)
 
     def drawChart(self):
-        graph = Figure(figsize=(6.7,3),tight_layout=True)
+        graph = Figure(figsize=(6.7,3.5),tight_layout=True)
         result = graph.add_subplot(111)
         result.grid(visible=True,axis='both', which='both')
         result.set_xlabel('Częstotliwość [Hz]')
         result.set_ylabel('Impedancja [Ω]')
+        result2 = result.twinx()
+        result2.set_ylabel('Kąt impedancji [°]')
         result.set_xscale('log')
+
         if self.impedanceModuleB.get() == 1:
-            result.plot(self.frequencyTable,self.impedanceTable)
+            result.plot(self.frequencyTable,self.impedanceTable, label='Moduł impedancji')
         else:
             pass
         if self.impedanceAngleB.get() == 1:
-            result.plot(self.frequencyTable,self.impedanceAngleTable)
+            result2.plot(self.frequencyTable,self.impedanceAngleTable, label='Kąt impedancji',c='r')
         else:
             pass
+        if self.realPartB.get() == 1:
+            result.plot(self.frequencyTable,self.realPartTable, label='Część rzeczywista')
+        else:
+            pass
+        if self.imaginaryPartB.get() == 1:
+            result.plot(self.frequencyTable,self.imaginaryPartTable, label='Część urojona')
+        else:
+            pass
+        
+        lines, labels = result.get_legend_handles_labels()
+        lines2, labels2 = result2.get_legend_handles_labels()
+        result.legend(lines+lines2,labels+labels2,loc=8,ncol=4,fontsize='xx-small',bbox_to_anchor=(0.5,-0.35))
+
         self.canvas = FigureCanvasTkAgg(graph, self.chartFrame)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack()
