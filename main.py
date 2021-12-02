@@ -22,19 +22,21 @@ class App(tk.Tk):
         self.imaginaryPartTable = []
 
         self.title('RLC in high frequency')
+        self.iconphoto(False, tk.PhotoImage(file='icon.png'))
 
         self.expandListFrame = tk.Frame(self)
         self.expandListFrame.grid(column=0,row=0)
-        self.options = ['Rezystor idealny','Rezystor rzeczywisty','Cewka idealna','Cewka rzeczywista','Kondensator idealny',"Kondensator rzeczywisty"]
+        self.options = ['Rezystor idealny','Rezystor rzeczywisty 1','Rezystor rzeczywisty 2','Cewka idealna','Cewka rzeczywista','Kondensator idealny',"Kondensator rzeczywisty 1","Kondensator rzeczywisty 2","Kondensator rzeczywisty 3"]
         self.clicked = tk.StringVar()
         self.clicked.set(self.options[0])
         self.choice = 'Rezystor idealny'
         self.expandList = tk.OptionMenu(self.expandListFrame, self.clicked, *self.options, command=self.displaySelected)
+        self.expandList.config(width=25, indicatoron=0)
         self.expandList.pack()
         
         self.BtnFrame = tk.Frame(self)
         self.BtnFrame.grid(column=2,row=0)
-        self.calculateBtn = tk.Button(self.BtnFrame, text='Oblicz', command=self.calculate)
+        self.calculateBtn = tk.Button(self.BtnFrame, text='Oblicz',width=10, command=self.calculate)
         self.calculateBtn.pack()
         
         self.imageFrame = tk.Frame(self)
@@ -143,42 +145,182 @@ class App(tk.Tk):
     #     return combinedFunction
         
     def functionDisplaySchemes(self):
-        scheme1 = ImageTk.PhotoImage(Image.open('schemes/1.png'))
-        scheme2 = ImageTk.PhotoImage(Image.open('schemes/2.png'))
-        scheme3 = ImageTk.PhotoImage(Image.open('schemes/3.png'))
-        scheme4 = ImageTk.PhotoImage(Image.open('schemes/4.png'))
-        scheme5 = ImageTk.PhotoImage(Image.open('schemes/5.png'))
-        scheme6 = ImageTk.PhotoImage(Image.open('schemes/6.png'))
+        scheme1 = ImageTk.PhotoImage(Image.open('schemes/Rideal.png'))
+        scheme2 = ImageTk.PhotoImage(Image.open('schemes/Rreal1.png'))
+        scheme3 = ImageTk.PhotoImage(Image.open('schemes/Rreal2.png'))
+        scheme4 = ImageTk.PhotoImage(Image.open('schemes/Lideal.png'))
+        scheme5 = ImageTk.PhotoImage(Image.open('schemes/Lreal1.png'))
+        scheme6 = ImageTk.PhotoImage(Image.open('schemes/Cideal.png'))
+        scheme7 = ImageTk.PhotoImage(Image.open('schemes/Creal1.png'))
+        scheme8 = ImageTk.PhotoImage(Image.open('schemes/Creal2.png'))
+        scheme9 = ImageTk.PhotoImage(Image.open('schemes/Creal3.png'))
         
         if self.choice == 'Rezystor idealny':
             self.schemeLabel.config(image=scheme1)
             self.schemeLabel.image = scheme1
-        elif self.choice == 'Rezystor rzeczywisty':
+        elif self.choice == 'Rezystor rzeczywisty 1':
             self.schemeLabel.config(image=scheme2)
             self.schemeLabel.image = scheme2
-        elif self.choice == 'Cewka idealna':
+        elif self.choice == 'Rezystor rzeczywisty 2':
             self.schemeLabel.config(image=scheme3)
             self.schemeLabel.image = scheme3
-        elif self.choice == 'Cewka rzeczywista':
+        elif self.choice == 'Cewka idealna':
             self.schemeLabel.config(image=scheme4)
             self.schemeLabel.image = scheme4
-        elif self.choice == 'Kondensator idealny':
+        elif self.choice == 'Cewka rzeczywista':
             self.schemeLabel.config(image=scheme5)
             self.schemeLabel.image = scheme5
-        elif self.choice == 'Kondensator rzeczywisty':
+        elif self.choice == 'Kondensator idealny':
             self.schemeLabel.config(image=scheme6)
             self.schemeLabel.image = scheme6
+        elif self.choice == 'Kondensator rzeczywisty 1':
+            self.schemeLabel.config(image=scheme7)
+            self.schemeLabel.image = scheme7
+        elif self.choice == 'Kondensator rzeczywisty 2':
+            self.schemeLabel.config(image=scheme8)
+            self.schemeLabel.image = scheme8
+        elif self.choice == 'Kondensator rzeczywisty 3':
+            self.schemeLabel.config(image=scheme9)
+            self.schemeLabel.image = scheme9
 
     def choiceInput(self):
-        self.inputFrame.grid_forget()
+        self.inputFrame.destroy()
+        self.inputFrame = tk.Frame(self)
         if self.choice == 'Rezystor idealny':
             self.idealRModel()
+        elif self.choice == 'Rezystor rzeczywisty 1':
+            self.real1RModel()
+        elif self.choice == 'Rezystor rzeczywisty 2':
+            self.real1RModel()
         elif self.choice == 'Cewka idealna':
             self.idealLModel()
+        elif self.choice == 'Cewka rzeczywista':
+            self.realLModel()
         elif self.choice == 'Kondensator idealny':
             self.idealCModel()
+        elif self.choice == 'Kondensator rzeczywisty 1':
+            self.real1CModel()
+        elif self.choice == 'Kondensator rzeczywisty 2':
+            self.real2CModel()
+        elif self.choice == 'Kondensator rzeczywisty 3':
+            self.real3CModel()
+
+    def real1CModel(self):
+        #self.inputFrame = tk.Frame(self)
+        self.inputFrame.grid(column=1, row=1,padx=30)
+        self.RpInput = tk.Entry(self.inputFrame)
+        self.RpInput.grid(column=1,row=0, sticky=W)
+        RpLabel = tk.Label(self.inputFrame, text='Rp')
+        RpLabel.grid(column=0,row=0, sticky=W)
+        RpUnitLabel = tk.Label(self.inputFrame, text='Ω')
+        RpUnitLabel.grid(column=3,row=0, sticky=W)
+        self.CInput = tk.Entry(self.inputFrame)
+        self.CInput.grid(column=1,row=1, sticky=W)
+        CLabel = tk.Label(self.inputFrame, text='C')
+        CLabel.grid(column=0,row=1, sticky=W)
+        CUnitLabel = tk.Label(self.inputFrame, text='pF')
+        CUnitLabel.grid(column=3,row=1, sticky=W)
+        self.LsInput = tk.Entry(self.inputFrame)
+        self.LsInput.grid(column=1,row=2, sticky=W)
+        LsLabel = tk.Label(self.inputFrame, text='Ls')
+        LsLabel.grid(column=0,row=2, sticky=W)
+        LsUnitLabel = tk.Label(self.inputFrame, text='µH')
+        LsUnitLabel.grid(column=3,row=2, sticky=W)
+        self.Fmin = tk.Entry(self.inputFrame)
+        self.Fmin.grid(column=1, row=3, sticky=W)
+        FminLabel = tk.Label(self.inputFrame, text='Fmin')
+        FminLabel.grid(column=0, row=3, sticky=W)
+        FminUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FminUnitLabel.grid(column=3, row=3, sticky=W)
+        self.Fmax = tk.Entry(self.inputFrame)
+        self.Fmax.grid(column=1, row=4, sticky=W)
+        FmaxLabel = tk.Label(self.inputFrame, text='Fmax')
+        FmaxLabel.grid(column=0, row=4, sticky=W)
+        FmaxUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FmaxUnitLabel.grid(column=3, row=4, sticky=W)
+
+    def real2CModel(self):
+        #self.inputFrame = tk.Frame(self)
+        self.inputFrame.grid(column=1, row=1,padx=30)
+        self.RpInput = tk.Entry(self.inputFrame)
+        self.RpInput.grid(column=1,row=0, sticky=W)
+        RpLabel = tk.Label(self.inputFrame, text='Rp')
+        RpLabel.grid(column=0,row=0, sticky=W)
+        RpUnitLabel = tk.Label(self.inputFrame, text='Ω')
+        RpUnitLabel.grid(column=3,row=0, sticky=W)
+        self.CInput = tk.Entry(self.inputFrame)
+        self.CInput.grid(column=1,row=1, sticky=W)
+        CLabel = tk.Label(self.inputFrame, text='C')
+        CLabel.grid(column=0,row=1, sticky=W)
+        CUnitLabel = tk.Label(self.inputFrame, text='pF')
+        CUnitLabel.grid(column=3,row=1, sticky=W)
+        self.RdInput = tk.Entry(self.inputFrame)
+        self.RdInput.grid(column=1,row=2, sticky=W)
+        RdLabel = tk.Label(self.inputFrame, text='Rd')
+        RdLabel.grid(column=0,row=2, sticky=W)
+        RdUnitLabel = tk.Label(self.inputFrame, text='Ω')
+        RdUnitLabel.grid(column=3,row=2, sticky=W)
+        self.Fmin = tk.Entry(self.inputFrame)
+        self.Fmin.grid(column=1, row=3, sticky=W)
+        FminLabel = tk.Label(self.inputFrame, text='Fmin')
+        FminLabel.grid(column=0, row=3, sticky=W)
+        FminUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FminUnitLabel.grid(column=3, row=3, sticky=W)
+        self.Fmax = tk.Entry(self.inputFrame)
+        self.Fmax.grid(column=1, row=4, sticky=W)
+        FmaxLabel = tk.Label(self.inputFrame, text='Fmax')
+        FmaxLabel.grid(column=0, row=4, sticky=W)
+        FmaxUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FmaxUnitLabel.grid(column=3, row=4, sticky=W)
+
+    def real3CModel(self):
+        #self.inputFrame = tk.Frame(self)
+        self.inputFrame.grid(column=1, row=1,padx=30)
+        self.RpInput = tk.Entry(self.inputFrame)
+        self.RpInput.grid(column=1,row=0, sticky=W)
+        RpLabel = tk.Label(self.inputFrame, text='Rp')
+        RpLabel.grid(column=0,row=0, sticky=W)
+        RpUnitLabel = tk.Label(self.inputFrame, text='Ω')
+        RpUnitLabel.grid(column=3,row=0, sticky=W)
+        self.CInput = tk.Entry(self.inputFrame)
+        self.CInput.grid(column=1,row=1, sticky=W)
+        CLabel = tk.Label(self.inputFrame, text='C')
+        CLabel.grid(column=0,row=1, sticky=W)
+        CUnitLabel = tk.Label(self.inputFrame, text='pF')
+        CUnitLabel.grid(column=3,row=1, sticky=W)
+        self.CpInput = tk.Entry(self.inputFrame)
+        self.CpInput.grid(column=1,row=2, sticky=W)
+        CpLabel = tk.Label(self.inputFrame, text='Cp')
+        CpLabel.grid(column=0,row=2, sticky=W)
+        CpUnitLabel = tk.Label(self.inputFrame, text='pF')
+        CpUnitLabel.grid(column=3,row=2, sticky=W)
+        self.RdInput = tk.Entry(self.inputFrame)
+        self.RdInput.grid(column=1,row=3, sticky=W)
+        RdLabel = tk.Label(self.inputFrame, text='Rd')
+        RdLabel.grid(column=0,row=3, sticky=W)
+        RdUnitLabel = tk.Label(self.inputFrame, text='Ω')
+        RdUnitLabel.grid(column=3,row=3, sticky=W)
+        self.LsInput = tk.Entry(self.inputFrame)
+        self.LsInput.grid(column=1,row=4, sticky=W)
+        LsLabel = tk.Label(self.inputFrame, text='Ls')
+        LsLabel.grid(column=0,row=4, sticky=W)
+        LsUnitLabel = tk.Label(self.inputFrame, text='µH')
+        LsUnitLabel.grid(column=3,row=4, sticky=W)
+        self.Fmin = tk.Entry(self.inputFrame)
+        self.Fmin.grid(column=1, row=5, sticky=W)
+        FminLabel = tk.Label(self.inputFrame, text='Fmin')
+        FminLabel.grid(column=0, row=5, sticky=W)
+        FminUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FminUnitLabel.grid(column=3, row=5, sticky=W)
+        self.Fmax = tk.Entry(self.inputFrame)
+        self.Fmax.grid(column=1, row=6, sticky=W)
+        FmaxLabel = tk.Label(self.inputFrame, text='Fmax')
+        FmaxLabel.grid(column=0, row=6, sticky=W)
+        FmaxUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FmaxUnitLabel.grid(column=3, row=6, sticky=W)
 
     def idealRModel(self):
+        #self.inputFrame = tk.Frame(self)
         self.inputFrame.grid(column=1, row=1,padx=30)
         self.RInput = tk.Entry(self.inputFrame)
         self.RInput.grid(column=1,row=0, sticky=W)
@@ -198,8 +340,43 @@ class App(tk.Tk):
         FmaxLabel.grid(column=0, row=2, sticky=W)
         FmaxUnitLabel = tk.Label(self.inputFrame, text='Hz')
         FmaxUnitLabel.grid(column=3, row=2, sticky=W)
-    
+
+    def real1RModel(self):
+        #self.inputFrame = tk.Frame(self)
+        self.inputFrame.grid(column=1, row=1,padx=30)
+        self.RInput = tk.Entry(self.inputFrame)
+        self.RInput.grid(column=1,row=0, sticky=W)
+        RLabel = tk.Label(self.inputFrame, text='R')
+        RLabel.grid(column=0,row=0, sticky=W)
+        RUnitLabel = tk.Label(self.inputFrame, text='Ω')
+        RUnitLabel.grid(column=3,row=0, sticky=W)
+        self.CpInput = tk.Entry(self.inputFrame)
+        self.CpInput.grid(column=1,row=1, sticky=W)
+        CpLabel = tk.Label(self.inputFrame, text='Cp')
+        CpLabel.grid(column=0,row=1, sticky=W)
+        CpUnitLabel = tk.Label(self.inputFrame, text='pF')
+        CpUnitLabel.grid(column=3,row=1, sticky=W)
+        self.LsInput = tk.Entry(self.inputFrame)
+        self.LsInput.grid(column=1,row=2, sticky=W)
+        LsLabel = tk.Label(self.inputFrame, text='Ls')
+        LsLabel.grid(column=0,row=2, sticky=W)
+        LsUnitLabel = tk.Label(self.inputFrame, text='µH')
+        LsUnitLabel.grid(column=3,row=2, sticky=W)
+        self.Fmin = tk.Entry(self.inputFrame)
+        self.Fmin.grid(column=1, row=3, sticky=W)
+        FminLabel = tk.Label(self.inputFrame, text='Fmin')
+        FminLabel.grid(column=0, row=3, sticky=W)
+        FminUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FminUnitLabel.grid(column=3, row=3, sticky=W)
+        self.Fmax = tk.Entry(self.inputFrame)
+        self.Fmax.grid(column=1, row=4, sticky=W)
+        FmaxLabel = tk.Label(self.inputFrame, text='Fmax')
+        FmaxLabel.grid(column=0, row=4, sticky=W)
+        FmaxUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FmaxUnitLabel.grid(column=3, row=4, sticky=W)
+        
     def idealLModel(self):
+        #self.inputFrame = tk.Frame(self)
         self.inputFrame.grid(column=1, row=1,padx=30)
         self.LInput = tk.Entry(self.inputFrame)
         self.LInput.grid(column=1,row=0, sticky=W)
@@ -220,7 +397,42 @@ class App(tk.Tk):
         FmaxUnitLabel = tk.Label(self.inputFrame, text='Hz')
         FmaxUnitLabel.grid(column=3, row=2, sticky=W)
 
+    def realLModel(self):
+        #self.inputFrame = tk.Frame(self)
+        self.inputFrame.grid(column=1, row=1,padx=30)
+        self.RpInput = tk.Entry(self.inputFrame)
+        self.RpInput.grid(column=1,row=0, sticky=W)
+        RpLabel = tk.Label(self.inputFrame, text='Rp')
+        RpLabel.grid(column=0,row=0, sticky=W)
+        RpUnitLabel = tk.Label(self.inputFrame, text='Ω')
+        RpUnitLabel.grid(column=3,row=0, sticky=W)
+        self.CpInput = tk.Entry(self.inputFrame)
+        self.CpInput.grid(column=1,row=1, sticky=W)
+        CpLabel = tk.Label(self.inputFrame, text='Cp')
+        CpLabel.grid(column=0,row=1, sticky=W)
+        CpUnitLabel = tk.Label(self.inputFrame, text='pF')
+        CpUnitLabel.grid(column=3,row=1, sticky=W)
+        self.LInput = tk.Entry(self.inputFrame)
+        self.LInput.grid(column=1,row=2, sticky=W)
+        LLabel = tk.Label(self.inputFrame, text='L')
+        LLabel.grid(column=0,row=2, sticky=W)
+        LUnitLabel = tk.Label(self.inputFrame, text='µH')
+        LUnitLabel.grid(column=3,row=2, sticky=W)
+        self.Fmin = tk.Entry(self.inputFrame)
+        self.Fmin.grid(column=1, row=3, sticky=W)
+        FminLabel = tk.Label(self.inputFrame, text='Fmin')
+        FminLabel.grid(column=0, row=3, sticky=W)
+        FminUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FminUnitLabel.grid(column=3, row=3, sticky=W)
+        self.Fmax = tk.Entry(self.inputFrame)
+        self.Fmax.grid(column=1, row=4, sticky=W)
+        FmaxLabel = tk.Label(self.inputFrame, text='Fmax')
+        FmaxLabel.grid(column=0, row=4, sticky=W)
+        FmaxUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FmaxUnitLabel.grid(column=3, row=4, sticky=W)
+
     def idealCModel(self):
+        #self.inputFrame = tk.Frame(self)
         self.inputFrame.grid(column=1, row=1,padx=30)
         self.CInput = tk.Entry(self.inputFrame)
         self.CInput.grid(column=1,row=0, sticky=W)
@@ -248,7 +460,7 @@ class App(tk.Tk):
         result.set_xlabel('Częstotliwość [Hz]')
         result.set_ylabel('Impedancja [Ω]')
         result2 = result.twinx()
-        result2.set_ylabel('Kąt impedancji [°]')
+        result2.set_ylabel('Kąt Impedancji [°]')
         result.set_xscale('log')
 
         if self.impedanceModuleB.get() == 1:
