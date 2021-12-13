@@ -20,6 +20,7 @@ class App(tk.Tk):
         self.impedanceAngleTable = []
         self.realPartTable = []
         self.imaginaryPartTable = []
+        self.f_rez = 0
 
         self.title('RLC in high frequency')
         self.iconphoto(False, tk.PhotoImage(file='icon.png'))
@@ -66,9 +67,26 @@ class App(tk.Tk):
         self.impedanceAngleTable = []
         self.realPartTable = []
         self.imaginaryPartTable = []
+        self.f_rez = 0
+        Fmin_value = int(self.Fmin.get())
+        Fmax_value = int(self.Fmax.get())
+        Fstep_value = 10
+        if Fmax_value > 10000:
+            Fstep_value = 100
+        elif Fmax_value > 100000:
+            Fstep_value = 1000
+        elif Fmax_value > 1000000:
+            Fstep_value = 10000
+        elif Fmax_value > 10000000:
+            Fstep_value = 100000
+        elif Fmax_value > 100000000:
+            Fstep_value = 1000000
+        elif Fmax_value > 1000000000:
+            Fstep_value = 10000000
         if self.choice == 'Rezystor idealny':
-            for f in range(int(self.Fmin.get()),int(self.Fmax.get()),10):
-                resistance = int(self.RInput.get())
+            self.f_rez = 0
+            for f in range(Fmin_value,Fmax_value,Fstep_value):
+                resistance = float(self.RInput.get())
                 reactance = 0
                 impedance = np.complex(resistance,reactance)
                 impedanceModule = np.absolute(impedance)
@@ -82,8 +100,9 @@ class App(tk.Tk):
                 self.impedanceTable.append(impedanceModule)
                 self.frequencyTable.append(f) 
         elif self.choice == 'Cewka idealna':
-            for f in range(int(self.Fmin.get()),int(self.Fmax.get()),10):
-                omega = 2*math.pi*f
+            self.f_rez = 0
+            for f in range(Fmin_value,Fmax_value,Fstep_value):
+                omega = 2*math.pi*f*1000
                 reactance = omega*int(self.LInput.get())*(10**-6)
                 resistance = 0
                 impedance = np.complex(resistance,reactance)
@@ -98,8 +117,9 @@ class App(tk.Tk):
                 self.impedanceTable.append(impedanceModule)
                 self.frequencyTable.append(f)
         elif self.choice == 'Kondensator idealny':
-            for f in range(int(self.Fmin.get()),int(self.Fmax.get()),10):
-                omega = 2*math.pi*f
+            self.f_rez = 0
+            for f in range(Fmin_value,Fmax_value,Fstep_value):
+                omega = 2*math.pi*f*1000
                 resistance = 0
                 reactance = -1/(omega*int(self.CInput.get())*(10**-12))
                 impedance = np.complex(resistance,reactance)
@@ -114,11 +134,101 @@ class App(tk.Tk):
                 self.impedanceTable.append(impedanceModule)
                 self.frequencyTable.append(f)
         elif self.choice == 'Rezystor rzeczywisty 1':
-            for f in range(int(self.Fmin.get()),int(self.Fmax.get()),10):
-                omega = 2*math.pi*f
-                resistance = (int(self.RInput.get())/((int(self.RInput.get())**2)*(int(self.CrInput.get()*(10**-12))**2)*(omega**2)+1))
-                reactance = -((int(self.RInput.get())**2)/((int(self.RInput.get())**2)*(int(self.CrInput.get()*(10**-12))**2)*(omega**2)+1))
+            Cr_value = float(self.CrInput.get())*(10**-12)
+            R_value = float(self.RInput.get())
+            self.f_rez = 0
+            for f in range(Fmin_value,Fmax_value,Fstep_value):
+                omega = 2*math.pi*f*1000
+                resistance = R_value/((R_value**2)*(omega**2)*(Cr_value**2)+1)
+                reactance = -((R_value**2)*omega*Cr_value)/((R_value**2)*(omega**2)*(Cr_value**2)+1)
                 impedance = np.complex(resistance,reactance)
+              
+                impedanceModule = np.absolute(impedance)
+                impedanceAngle = np.angle(impedance,deg=True)
+                impedanceRealPart = np.real(impedance)
+                impedanceImaginaryPart = np.imag(impedance)
+
+                self.imaginaryPartTable.append(impedanceImaginaryPart)
+                self.realPartTable.append(impedanceRealPart)
+                self.impedanceAngleTable.append(impedanceAngle)
+                self.impedanceTable.append(impedanceModule)
+                self.frequencyTable.append(f)
+        elif self.choice == 'Rezystor rzeczywisty 2':
+            Cr_value = float(self.CrInput.get())*(10**-12)
+            R_value = float(self.RInput.get())
+            Lr_value = float(self.LrInput.get())*(10**-6)
+            self.f_rez = (((-R_value*Cr_value)+(math.sqrt(((R_value**2)*(Cr_value**2))+(4*Lr_value*Cr_value))))/(4*math.pi*Lr_value*Cr_value))/1000
+            for f in range(Fmin_value,Fmax_value,Fstep_value):
+                omega = 2*math.pi*f*1000
+                resistance = R_value/(((omega**2)*(R_value**2)*(Cr_value**2))+((omega**4)*(Lr_value**2)*(Cr_value**2))-(2*(omega**2)*Lr_value*Cr_value)+1)
+                reactance = (-((omega**3)*(Lr_value**2)*Cr_value)+(omega*Lr_value)-(omega*(R_value**2)*Cr_value))/(((omega**2)*(R_value**2)*(Cr_value**2))+((omega**4)*(Lr_value**2)*(Cr_value**2))-(2*(omega**2)*Lr_value*Cr_value)+1)
+                impedance = np.complex(resistance,reactance)
+              
+                impedanceModule = np.absolute(impedance)
+                impedanceAngle = np.angle(impedance,deg=True)
+                impedanceRealPart = np.real(impedance)
+                impedanceImaginaryPart = np.imag(impedance)
+
+                self.imaginaryPartTable.append(impedanceImaginaryPart)
+                self.realPartTable.append(impedanceRealPart)
+                self.impedanceAngleTable.append(impedanceAngle)
+                self.impedanceTable.append(impedanceModule)
+                self.frequencyTable.append(f)
+        elif self.choice == 'Rezystor rzeczywisty 3':
+            Cr_value = float(self.CrInput.get())*(10**-12)
+            R_value = float(self.RInput.get())
+            Lr_value = float(self.LrInput.get())*(10**-6)
+            Lw_value = float(self.LwInput.get())*(10**-6)
+            self.f_rez = (1/(2*math.pi*math.sqrt(Cr_value*Lr_value)))/1000
+            for f in range(Fmin_value,Fmax_value,Fstep_value):
+                omega = 2*math.pi*f*1000
+                resistance = R_value/(((omega**2)*(R_value**2)*(Cr_value**2))+((omega**4)*(Lr_value**2)*(Cr_value**2))-(2*(omega**2)*Lr_value*Cr_value)+1)
+                reactance = (-((omega**3)*(Lr_value**2)*Cr_value)+(omega*Lr_value)-(omega*(R_value**2)*Cr_value)+(omega*Lw_value*((((omega**2)*(R_value**2)*(Cr_value**2))+((omega**4)*(Lr_value**2)*(Cr_value**2))-(2*(omega**2)*Lr_value*Cr_value)+1))))/(((omega**2)*(R_value**2)*(Cr_value**2))+((omega**4)*(Lr_value**2)*(Cr_value**2))-(2*(omega**2)*Lr_value*Cr_value)+1)
+                impedance = np.complex(resistance,reactance)
+              
+                impedanceModule = np.absolute(impedance)
+                impedanceAngle = np.angle(impedance,deg=True)
+                impedanceRealPart = np.real(impedance)
+                impedanceImaginaryPart = np.imag(impedance)
+
+                self.imaginaryPartTable.append(impedanceImaginaryPart)
+                self.realPartTable.append(impedanceRealPart)
+                self.impedanceAngleTable.append(impedanceAngle)
+                self.impedanceTable.append(impedanceModule)
+                self.frequencyTable.append(f)
+        elif self.choice == 'Cewka rzeczywista':
+            Cr_value = float(self.CrInput.get())*(10**-12)
+            Rs_value = float(self.RsInput.get())
+            L_value = float(self.LInput.get())*(10**-6)
+            self.f_rez = (1/(2*math.pi*math.sqrt(Cr_value*L_value)))
+            for f in range(Fmin_value,Fmax_value,Fstep_value):
+                omega = 2*math.pi*f*1000
+                resistance = Rs_value/(((omega**2)*(Rs_value**2)*(Cr_value**2))+((omega**4)*(L_value**2)*(Cr_value**2))-(2*(omega**2)*L_value*Cr_value)+1)
+                reactance = (-((omega**3)*(L_value**2)*Cr_value)+(omega*L_value)-(omega*(Rs_value**2)*Cr_value))/(((omega**2)*(Rs_value**2)*(Cr_value**2))+((omega**4)*(L_value**2)*(Cr_value**2))-(2*(omega**2)*L_value*Cr_value)+1)
+                impedance = np.complex(resistance,reactance)
+              
+                impedanceModule = np.absolute(impedance)
+                impedanceAngle = np.angle(impedance,deg=True)
+                impedanceRealPart = np.real(impedance)
+                impedanceImaginaryPart = np.imag(impedance)
+
+                self.imaginaryPartTable.append(impedanceImaginaryPart)
+                self.realPartTable.append(impedanceRealPart)
+                self.impedanceAngleTable.append(impedanceAngle)
+                self.impedanceTable.append(impedanceModule)
+                self.frequencyTable.append(f)
+        elif self.choice == 'Kondensator rzeczywisty':
+            C_value = float(self.CInput.get())*(10**-12)
+            Ru_value = float(self.RuInput.get())
+            Rs_value = float(self.RsInput.get())
+            Lr_value = float(self.LrInput.get())*(10**-6)
+            self.f_rez = (1/(2*math.pi*math.sqrt(C_value*Lr_value)))
+            for f in range(Fmin_value,Fmax_value,100):
+                omega = 2*math.pi*f*1000
+                resistance = (Ru_value+(Rs_value*((Ru_value**2)*(omega**2)*(C_value**2)+1)))/((Ru_value**2)*(omega**2)*(C_value**2)+1)
+                reactance = ((((Ru_value**2)*-omega*C_value)+(omega*Lr_value*((Ru_value**2)*(omega**2)*(C_value**2)+1)))/((Ru_value**2)*(omega**2)*(C_value**2)+1))
+                impedance = np.complex(resistance,reactance)
+              
                 impedanceModule = np.absolute(impedance)
                 impedanceAngle = np.angle(impedance,deg=True)
                 impedanceRealPart = np.real(impedance)
@@ -230,13 +340,13 @@ class App(tk.Tk):
         self.Fmin.grid(column=1, row=1, sticky=W)
         FminLabel = tk.Label(self.inputFrame, text='Fmin')
         FminLabel.grid(column=0, row=1, sticky=W)
-        FminUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FminUnitLabel = tk.Label(self.inputFrame, text='kHz')
         FminUnitLabel.grid(column=3, row=1, sticky=W)
         self.Fmax = tk.Entry(self.inputFrame)
         self.Fmax.grid(column=1, row=2, sticky=W)
         FmaxLabel = tk.Label(self.inputFrame, text='Fmax')
         FmaxLabel.grid(column=0, row=2, sticky=W)
-        FmaxUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FmaxUnitLabel = tk.Label(self.inputFrame, text='kHz')
         FmaxUnitLabel.grid(column=3, row=2, sticky=W)
 
     def real1RModel(self):
@@ -258,13 +368,13 @@ class App(tk.Tk):
         self.Fmin.grid(column=1, row=2, sticky=W)
         FminLabel = tk.Label(self.inputFrame, text='Fmin')
         FminLabel.grid(column=0, row=2, sticky=W)
-        FminUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FminUnitLabel = tk.Label(self.inputFrame, text='kHz')
         FminUnitLabel.grid(column=3, row=2, sticky=W)
         self.Fmax = tk.Entry(self.inputFrame)
         self.Fmax.grid(column=1, row=3, sticky=W)
         FmaxLabel = tk.Label(self.inputFrame, text='Fmax')
         FmaxLabel.grid(column=0, row=3, sticky=W)
-        FmaxUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FmaxUnitLabel = tk.Label(self.inputFrame, text='kHz')
         FmaxUnitLabel.grid(column=3, row=3, sticky=W)
 
     def real2RModel(self):
@@ -292,13 +402,13 @@ class App(tk.Tk):
         self.Fmin.grid(column=1, row=3, sticky=W)
         FminLabel = tk.Label(self.inputFrame, text='Fmin')
         FminLabel.grid(column=0, row=3, sticky=W)
-        FminUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FminUnitLabel = tk.Label(self.inputFrame, text='kHz')
         FminUnitLabel.grid(column=3, row=3, sticky=W)
         self.Fmax = tk.Entry(self.inputFrame)
         self.Fmax.grid(column=1, row=4, sticky=W)
         FmaxLabel = tk.Label(self.inputFrame, text='Fmax')
         FmaxLabel.grid(column=0, row=4, sticky=W)
-        FmaxUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FmaxUnitLabel = tk.Label(self.inputFrame, text='kHz')
         FmaxUnitLabel.grid(column=3, row=4, sticky=W)
 
 
@@ -333,13 +443,13 @@ class App(tk.Tk):
         self.Fmin.grid(column=1, row=4, sticky=W)
         FminLabel = tk.Label(self.inputFrame, text='Fmin')
         FminLabel.grid(column=0, row=4, sticky=W)
-        FminUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FminUnitLabel = tk.Label(self.inputFrame, text='kHz')
         FminUnitLabel.grid(column=3, row=4, sticky=W)
         self.Fmax = tk.Entry(self.inputFrame)
         self.Fmax.grid(column=1, row=5, sticky=W)
         FmaxLabel = tk.Label(self.inputFrame, text='Fmax')
         FmaxLabel.grid(column=0, row=5, sticky=W)
-        FmaxUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FmaxUnitLabel = tk.Label(self.inputFrame, text='kHz')
         FmaxUnitLabel.grid(column=3, row=5, sticky=W)
 
     def idealLModel(self):
@@ -355,13 +465,13 @@ class App(tk.Tk):
         self.Fmin.grid(column=1, row=1, sticky=W)
         FminLabel = tk.Label(self.inputFrame, text='Fmin')
         FminLabel.grid(column=0, row=1, sticky=W)
-        FminUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FminUnitLabel = tk.Label(self.inputFrame, text='kHz')
         FminUnitLabel.grid(column=3, row=1, sticky=W)
         self.Fmax = tk.Entry(self.inputFrame)
         self.Fmax.grid(column=1, row=2, sticky=W)
         FmaxLabel = tk.Label(self.inputFrame, text='Fmax')
         FmaxLabel.grid(column=0, row=2, sticky=W)
-        FmaxUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FmaxUnitLabel = tk.Label(self.inputFrame, text='kHz')
         FmaxUnitLabel.grid(column=3, row=2, sticky=W)
 
     def realLModel(self):
@@ -389,13 +499,13 @@ class App(tk.Tk):
         self.Fmin.grid(column=1, row=3, sticky=W)
         FminLabel = tk.Label(self.inputFrame, text='Fmin')
         FminLabel.grid(column=0, row=3, sticky=W)
-        FminUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FminUnitLabel = tk.Label(self.inputFrame, text='kHz')
         FminUnitLabel.grid(column=3, row=3, sticky=W)
         self.Fmax = tk.Entry(self.inputFrame)
         self.Fmax.grid(column=1, row=4, sticky=W)
         FmaxLabel = tk.Label(self.inputFrame, text='Fmax')
         FmaxLabel.grid(column=0, row=4, sticky=W)
-        FmaxUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FmaxUnitLabel = tk.Label(self.inputFrame, text='kHz')
         FmaxUnitLabel.grid(column=3, row=4, sticky=W)
 
     def idealCModel(self):
@@ -411,13 +521,13 @@ class App(tk.Tk):
         self.Fmin.grid(column=1, row=1, sticky=W)
         FminLabel = tk.Label(self.inputFrame, text='Fmin')
         FminLabel.grid(column=0, row=1, sticky=W)
-        FminUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FminUnitLabel = tk.Label(self.inputFrame, text='kHz')
         FminUnitLabel.grid(column=3, row=1, sticky=W)
         self.Fmax = tk.Entry(self.inputFrame)
         self.Fmax.grid(column=1, row=2, sticky=W)
         FmaxLabel = tk.Label(self.inputFrame, text='Fmax')
         FmaxLabel.grid(column=0, row=2, sticky=W)
-        FmaxUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FmaxUnitLabel = tk.Label(self.inputFrame, text='kHz')
         FmaxUnitLabel.grid(column=3, row=2, sticky=W)
 
     def realCModel(self):
@@ -450,24 +560,29 @@ class App(tk.Tk):
         self.Fmin.grid(column=1, row=4, sticky=W)
         FminLabel = tk.Label(self.inputFrame, text='Fmin')
         FminLabel.grid(column=0, row=4, sticky=W)
-        FminUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FminUnitLabel = tk.Label(self.inputFrame, text='kHz')
         FminUnitLabel.grid(column=3, row=4, sticky=W)
         self.Fmax = tk.Entry(self.inputFrame)
         self.Fmax.grid(column=1, row=5, sticky=W)
         FmaxLabel = tk.Label(self.inputFrame, text='Fmax')
         FmaxLabel.grid(column=0, row=5, sticky=W)
-        FmaxUnitLabel = tk.Label(self.inputFrame, text='Hz')
+        FmaxUnitLabel = tk.Label(self.inputFrame, text='kHz')
         FmaxUnitLabel.grid(column=3, row=5, sticky=W)
 
     def drawChart(self):
         graph = Figure(figsize=(6.7,3.5),tight_layout=True)
         result = graph.add_subplot(111)
         result.grid(visible=True,axis='both', which='both')
-        result.set_xlabel('Częstotliwość [Hz]')
+        result.set_xlabel('Częstotliwość [kHz]')
         result.set_ylabel('Impedancja [Ω]')
         result2 = result.twinx()
         result2.set_ylabel('Kąt Impedancji [°]')
         result.set_xscale('log')
+
+        if self.f_rez <= 0:
+            pass
+        else:
+            result.axvline(x=self.f_rez,ls='--',color='black')
 
         if self.impedanceModuleB.get() == 1:
             result.plot(self.frequencyTable,self.impedanceTable, label='Moduł impedancji')
@@ -485,7 +600,9 @@ class App(tk.Tk):
             result.plot(self.frequencyTable,self.imaginaryPartTable, label='Część urojona')
         else:
             pass
+
         
+
         lines, labels = result.get_legend_handles_labels()
         lines2, labels2 = result2.get_legend_handles_labels()
         result.legend(lines+lines2,labels+labels2,loc=8,ncol=4,fontsize='xx-small',bbox_to_anchor=(0.5,-0.35))
